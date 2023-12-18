@@ -1,0 +1,1 @@
+window.Wized=window.Wized||[];window.Wized.push(()=>{const e=document.querySelector('[wized-filter-element="list"]');const n=document.querySelector('[wized-filter-element="empty-state"]');const t=n.getAttribute("wized-hidden-class");const r=()=>{e.children.length===0?n.classList.remove(t):n.classList.add(t)};const o=new MutationObserver(r);o.observe(e,{childList:!0}),r()});
