@@ -1,2 +1,246 @@
-window.Wized=window.Wized||[];window.Wized.push((Wized)=>{let e,n=getCurrentFilterState();function getCurrentFilterState(){const e={};document.querySelectorAll("[wized-variable]").forEach(n=>{const t=n.getAttribute("wized-variable");e[t]=Wized.data.v[t]});return e}function haveFiltersChanged(){const e=getCurrentFilterState();return JSON.stringify(e)!==JSON.stringify(n)}window.executeWizedRequest=async()=>{if(haveFiltersChanged()){const e=document.querySelector('[wized-filter-element="filters"]');if(e&&e.hasAttribute("wized-filter-request")){const n=e.getAttribute("wized-filter-request");try{await Wized.requests.execute(n),console.log(`Request ${n} executed successfully`),n=getCurrentFilterState()}catch(e){console.error(`Error executing request ${n}:`,e)}}}};const t=(t,n)=>{return(...s)=>{clearTimeout(e),e=setTimeout(()=>t.apply(this,s),n)}};const r=(t,n)=>{Wized.data.v[t]=n};const o=()=>{const e=document.querySelector('[wized-filter-element="filters"]')?.getAttribute("wized-filter-current-page");e&&Wized.data.v.hasOwnProperty(e)&&(Wized.data.v[e]=1,window.executeWizedRequest())};const i=t(()=>{haveFiltersChanged()&&(o(),n=getCurrentFilterState())},500);const s=(e,t)=>{const n=e.closest("[wized-variable]").getAttribute("wized-variable"),r=document.querySelectorAll(`[wized-variable="${n}"] input[type="checkbox"]`),o=Array.from(r).filter(e=>e.checked).map(e=>e.nextElementSibling.textContent.trim());r(n,o),i()},c=(e,t)=>{const n=e.closest("[wized-variable]").getAttribute("wized-variable"),r=e.checked?e.nextElementSibling.textContent.trim():"";r(n,r),i()},a=(e,t)=>{const n=e.getAttribute("wized-variable"),r=e.value;r(n,r),i()};const l=async()=>{const e=document.querySelector("[wized-filter-request-trigger]");if(e){const n=e.getAttribute("wized-filter-request-trigger");n&&(resetCurrentPageVariable(),try{await Wized.requests.execute(n),console.log(`Triggered request ${n} executed successfully`)}catch(e){console.error(`Error executing triggered request ${n}:`,e)}}};const u=()=>{const e=document.querySelectorAll("form");e.forEach(e=>{e.addEventListener("submit",e=>{e.preventDefault(),l()})})};const d=e=>{if("Enter"===e.key){e.preventDefault()}};const f=e=>{e.preventDefault()};const h=()=>{document.querySelectorAll('[wized-variable] input[type="checkbox"]').forEach(e=>{e.addEventListener("change",()=>s(e))}),document.querySelectorAll('[wized-variable] input[type="radio"]').forEach(e=>{e.addEventListener("change",()=>c(e))}),document.querySelectorAll("select[wized-variable]").forEach(e=>{e.addEventListener("change",()=>a(e))}),u();const n=document.querySelector("input[wized-filter-search-variable]");n&&n.addEventListener("keypress",d),document.querySelectorAll('form button, form a, form input[type="button"], form input[type="submit"]').forEach(e=>{e.addEventListener("click",f)})};const g=()=>{const e=document.querySelector("[wized-filter-request-trigger]");e&&e.addEventListener("click",l)};const p=()=>{attachListeners(),attachTriggerListener()};const m=new MutationObserver(e=>{e.forEach(e=>{"childList"===e.type&&e.addedNodes.length>0&&p()})});m.observe(document.querySelector('[wized-filter-element="filters"]'),{childList:!0,subtree:!0}),p()});
+window.Wized = window.Wized || [];
+window.Wized.push((Wized) => {
+  let debounceTimer;
+  let previousFilterState = getCurrentFilterState(); // Initialize previous filter state
+
+  // Function to get the current state of filters
+  function getCurrentFilterState() {
+    const filterState = {};
+    const filterElements = document.querySelectorAll("[wized-variable]");
+    filterElements.forEach((element) => {
+      const variableName = element.getAttribute("wized-variable");
+      filterState[variableName] = Wized.data.v[variableName];
+    });
+    return filterState;
+  }
+
+  // Function to check if filters have changed
+  function haveFiltersChanged() {
+    const currentFilterState = getCurrentFilterState();
+    return (
+      JSON.stringify(currentFilterState) !== JSON.stringify(previousFilterState)
+    );
+  }
+
+  // Global function to execute Wized request
+  window.executeWizedRequest = async () => {
+    if (haveFiltersChanged()) {
+      const filtersElement = document.querySelector(
+        '[wized-filter-element="filters"]'
+      );
+      if (
+        filtersElement &&
+        filtersElement.hasAttribute("wized-filter-request")
+      ) {
+        const requestName = filtersElement.getAttribute("wized-filter-request");
+        try {
+          await Wized.requests.execute(requestName);
+          console.log(`Request ${requestName} executed successfully`);
+          previousFilterState = getCurrentFilterState(); // Update the filter state
+        } catch (error) {
+          console.error(`Error executing request ${requestName}:`, error);
+        }
+      }
+    }
+  };
+
+  // Debounce function
+  const debounce = (func, delay) => {
+    return (...args) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => func.apply(this, args), delay);
+    };
+  };
+
+  // Function to update Wized variable
+  const updateWizedVariable = (variableName, value) => {
+    Wized.data.v[variableName] = value;
+  };
+
+  // Function to reset current page and execute Wized request
+  const resetCurrentPageAndExecuteWizedRequest = () => {
+    const currentPageVariableName = document
+      .querySelector('[wized-filter-element="filters"]')
+      ?.getAttribute("wized-filter-current-page");
+    if (
+      currentPageVariableName &&
+      Wized.data.v.hasOwnProperty(currentPageVariableName)
+    ) {
+      Wized.data.v[currentPageVariableName] = 1;
+      window.executeWizedRequest();
+    }
+  };
+
+  // Function to apply filters and update page
+  const applyFiltersAndUpdatePage = debounce(() => {
+    if (haveFiltersChanged()) {
+      resetCurrentPageAndExecuteWizedRequest();
+      previousFilterState = getCurrentFilterState(); // Update previous state
+    }
+  }, 500);
+
+  // Event handler functions
+  const handleCheckboxChange = (checkbox) => {
+    const variableName = checkbox
+      .closest("[wized-variable]")
+      .getAttribute("wized-variable");
+    const checkboxes = document.querySelectorAll(
+      `[wized-variable="${variableName}"] input[type="checkbox"]`
+    );
+    const checkedValues = Array.from(checkboxes)
+      .filter((cb) => cb.checked)
+      .map((cb) => cb.nextElementSibling.textContent.trim());
+    updateWizedVariable(variableName, checkedValues);
+    applyFiltersAndUpdatePage();
+  };
+
+  const handleRadioChange = (radio) => {
+    const variableName = radio
+      .closest("[wized-variable]")
+      .getAttribute("wized-variable");
+    const value = radio.checked
+      ? radio.nextElementSibling.textContent.trim()
+      : "";
+    updateWizedVariable(variableName, value);
+    applyFiltersAndUpdatePage();
+  };
+
+  const handleSelectChange = (select) => {
+    const variableName = select.getAttribute("wized-variable");
+    const value = select.value;
+    updateWizedVariable(variableName, value);
+    applyFiltersAndUpdatePage();
+  };
+
+  // Function to execute Wized request based on the trigger element
+  const executeTriggeredWizedRequest = async () => {
+    const triggerElement = document.querySelector(
+      "[wized-filter-request-trigger]"
+    );
+    if (triggerElement) {
+      const requestName = triggerElement.getAttribute(
+        "wized-filter-request-trigger"
+      );
+      if (requestName) {
+        resetCurrentPageVariable(); // Reset current page variable to 1
+        try {
+          await Wized.requests.execute(requestName);
+          console.log(`Triggered request ${requestName} executed successfully`);
+        } catch (error) {
+          console.error(
+            `Error executing triggered request ${requestName}:`,
+            error
+          );
+        }
+      }
+    }
+  };
+
+  // Function to reset the current page variable to 1
+  const resetCurrentPageVariable = () => {
+    const currentPageVariableName = document
+      .querySelector('[wized-filter-element="filters"]')
+      ?.getAttribute("wized-filter-current-page");
+    if (
+      currentPageVariableName &&
+      Wized.data.v.hasOwnProperty(currentPageVariableName)
+    ) {
+      Wized.data.v[currentPageVariableName] = 1;
+    }
+  };
+
+  // Function to prevent default form submission
+  const preventDefaultFormSubmission = () => {
+    const forms = document.querySelectorAll("form");
+    forms.forEach((form) => {
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        executeTriggeredWizedRequest(); // Optionally trigger a Wized request on form submission
+      });
+    });
+  };
+
+  // Function to handle keypress event in search input
+  const handleSearchInputKeypress = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault(); // Prevent form submission
+      // Optionally, add any logic here to handle the search action
+    }
+  };
+
+  // Function to handle button and link clicks within the form
+  const handleFormElementClick = (event) => {
+    event.preventDefault(); // Prevent default action (like form submission)
+    // Optionally, add any specific logic for button or link click here
+  };
+
+  // Function to attach event listeners
+  const attachListeners = () => {
+    document
+      .querySelectorAll('[wized-variable] input[type="checkbox"]')
+      .forEach((checkbox) => {
+        checkbox.addEventListener("change", () =>
+          handleCheckboxChange(checkbox)
+        );
+      });
+
+    document
+      .querySelectorAll('[wized-variable] input[type="radio"]')
+      .forEach((radio) => {
+        radio.addEventListener("change", () => handleRadioChange(radio));
+      });
+
+    document.querySelectorAll("select[wized-variable]").forEach((select) => {
+      select.addEventListener("change", () => handleSelectChange(select));
+    });
+
+    preventDefaultFormSubmission(); // Attach form submission preventer
+    // Attach keypress listener to search input
+    const searchInput = document.querySelector(
+      "input[wized-filter-search-variable]"
+    );
+    if (searchInput) {
+      searchInput.addEventListener("keypress", handleSearchInputKeypress);
+    }
+
+    const formButtonsAndLinks = document.querySelectorAll(
+      'form button, form a, form input[type="button"], form input[type="submit"]'
+    );
+    formButtonsAndLinks.forEach((element) => {
+      element.addEventListener("click", handleFormElementClick);
+    });
+  };
+
+  // Attach event listener to the trigger element
+  const attachTriggerListener = () => {
+    const triggerElement = document.querySelector(
+      "[wized-filter-request-trigger]"
+    );
+    if (triggerElement) {
+      triggerElement.addEventListener("click", executeTriggeredWizedRequest);
+    }
+  };
+
+  // Function to attach all event listeners
+  const attachAllListeners = () => {
+    attachListeners(); // Attach filter listeners
+    attachTriggerListener(); // Attach trigger listener
+  };
+
+  // MutationObserver to observe dynamic changes in filter elements
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+        attachAllListeners();
+      }
+    });
+  });
+
+  observer.observe(document.querySelector('[wized-filter-element="filters"]'), {
+    childList: true,
+    subtree: true,
+  });
+
+  attachAllListeners(); // Initialize all event listeners
+});
 
