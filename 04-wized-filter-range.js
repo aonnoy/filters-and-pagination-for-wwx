@@ -1,1 +1,182 @@
-window.Wized=window.Wized||[];window.Wized.push((Wized)=>{const e=()=>{document.querySelectorAll("select[wized-filter-range-from], select[wized-filter-range-to]").forEach((e)=>{e.querySelectorAll("option").forEach((e)=>{e.disabled=!1})})};const t=()=>{const e=document.querySelectorAll('[wized-filter-element="parent-wrapper"]');e.forEach((e)=>{const t=e.getAttribute("wized-hidden-class");t&&e.classList.contains(t)&&e.classList.remove(t)})};const n=(e)=>{const t=document.querySelector(`[wized-variable="${e}"]`);return t?t.getAttribute("wized-filter-tag-category"):null};const r=(e)=>{const t=document.querySelector('[wized-filter-tag="wrapper"]');const r=[...t.querySelectorAll('[wized-filter-tag="tag-template"]')].filter((t)=>t.querySelector('[wized-filter-tag="tag-text"]').textContent.startsWith(`${e}:`));r.forEach((e)=>e.remove())};const i=(e)=>{e.split(",").forEach((e)=>{const t=e.trim();Wized.data.v[t]=Array.isArray(Wized.data.v[t])?[]:null;document.querySelectorAll(`[wized-variable="${t}"] input[type="checkbox"], [wized-variable="${t}"] input[type="radio"]`).forEach((e)=>{e.checked=!1;const t=e.previousElementSibling;t&&t.classList.contains("w--redirected-checked")&&t.classList.remove("w--redirected-checked")});const r=document.querySelector(`select[wized-variable="${t}"]`);r&&(r.selectedIndex=0);const i=document.querySelector(`input[wized-filter-search*="${t}"]`);i&&(i.value="");const o=n(t);o&&r(o)});e();t();d()};const o=()=>{document.querySelectorAll("[wized-filter-clear]").forEach((e)=>{const t=e.getAttribute("wized-filter-clear");"clear-all"!==t&&i(t)});e();t();const r=document.querySelector('[wized-filter-tag="wrapper"]');r&&(r.innerHTML="");d()};const c=(e,t)=>{let n;return function(...r){const i=this;clearTimeout(n);n=setTimeout(()=>e.apply(i,r),t)}};const s=()=>{resetInfiniteLoadingContent();const e=document.querySelector('[wized-filter-element="filters"]');const t=e?.getAttribute("wized-filter-current-page");if(t&&Wized.data.v.hasOwnProperty(t)){Wized.data.v[t]=1}window.executeWizedRequest?window.executeWizedRequest():console.error("Global executeWizedRequest function not found.")};const u=c(s,1e3);function resetInfiniteLoadingContent(){const e=document.querySelector("[wized-load-more-variable]")?.getAttribute("wized-load-more-variable");e&&Wized.data.v.hasOwnProperty(e)&&(Wized.data.v[e]=[])}document.querySelectorAll("[wized-filter-clear]").forEach((e)=>{e.addEventListener("click",(t)=>{t.preventDefault();const n=e.getAttribute("wized-filter-clear");"clear-all"===n?o():i(n);u()})});const l=()=>{};const f=new MutationObserver((e)=>{e.forEach((e)=>{if(e.type==="childList"&&e.addedNodes.length>0){l()}})});f.observe(document.querySelector('[wized-filter-element="filters"]'),{childList:!0,subtree:!0});l();e();t()}); 
+window.Wized = window.Wized || [];
+window.Wized.push((Wized) => {
+  const enableRangeSelectOptions = () => {
+    document
+      .querySelectorAll(
+        "select[wized-filter-range-from], select[wized-filter-range-to]"
+      )
+      .forEach((select) => {
+        select.querySelectorAll("option").forEach((option) => {
+          option.disabled = false;
+        });
+      });
+  };
+
+  const resetParentWrapperVisibility = () => {
+    const parentWrappers = document.querySelectorAll(
+      '[wized-filter-element="parent-wrapper"]'
+    );
+    parentWrappers.forEach((parentWrapper) => {
+      const hiddenClass = parentWrapper.getAttribute("wized-hidden-class");
+      if (hiddenClass && parentWrapper.classList.contains(hiddenClass)) {
+        parentWrapper.classList.remove(hiddenClass);
+      }
+    });
+  };
+
+  const findTagCategory = (variableName) => {
+    const filterElement = document.querySelector(
+      `[wized-variable="${variableName}"]`
+    );
+    return filterElement
+      ? filterElement.getAttribute("wized-filter-tag-category")
+      : null;
+  };
+
+  const removeCategoryTags = (category) => {
+    const tagsWrapper = document.querySelector('[wized-filter-tag="wrapper"]');
+    const tagsToRemove = [
+      ...tagsWrapper.querySelectorAll('[wized-filter-tag="tag-template"]'),
+    ].filter((tag) =>
+      tag
+        .querySelector('[wized-filter-tag="tag-text"]')
+        .textContent.startsWith(`${category}:`)
+    );
+    tagsToRemove.forEach((tag) => tag.remove());
+  };
+
+  const resetIndividualFilter = (variableName) => {
+    variableName.split(",").forEach((name) => {
+      const trimmedName = name.trim();
+      Wized.data.v[trimmedName] = Array.isArray(Wized.data.v[trimmedName])
+        ? []
+        : null;
+      document
+        .querySelectorAll(
+          `[wized-variable="${trimmedName}"] input[type="checkbox"], [wized-variable="${trimmedName}"] input[type="radio"]`
+        )
+        .forEach((input) => {
+          input.checked = false;
+          const customInput = input.previousElementSibling;
+          if (
+            customInput &&
+            customInput.classList.contains("w--redirected-checked")
+          ) {
+            customInput.classList.remove("w--redirected-checked");
+          }
+        });
+      const select = document.querySelector(
+        `select[wized-variable="${trimmedName}"]`
+      );
+      if (select) {
+        select.selectedIndex = 0;
+      }
+      const searchInput = document.querySelector(
+        `input[wized-filter-search*="${trimmedName}"]`
+      );
+      if (searchInput) {
+        searchInput.value = "";
+      }
+      const tagCategory = findTagCategory(trimmedName);
+      if (tagCategory) {
+        removeCategoryTags(tagCategory);
+      }
+    });
+    enableRangeSelectOptions();
+    resetParentWrapperVisibility();
+    debouncedResetPageAndExecuteWizedRequest();
+  };
+
+  const clearAllFilters = () => {
+    document.querySelectorAll("[wized-filter-clear]").forEach((clearButton) => {
+      const variableNames = clearButton.getAttribute("wized-filter-clear");
+      if (variableNames !== "clear-all") {
+        resetIndividualFilter(variableNames);
+      }
+    });
+    enableRangeSelectOptions();
+    resetParentWrapperVisibility();
+    const tagsWrapper = document.querySelector('[wized-filter-tag="wrapper"]');
+    if (tagsWrapper) {
+      tagsWrapper.innerHTML = "";
+    }
+    debouncedResetPageAndExecuteWizedRequest();
+  };
+
+  const debounce = (func, delay) => {
+    let debounceTimer;
+    return function (...args) {
+      const context = this;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    };
+  };
+
+  const resetPageAndExecuteWizedRequest = () => {
+    resetInfiniteLoadingContent();
+    const filtersElement = document.querySelector(
+      '[wized-filter-element="filters"]'
+    );
+    const currentPageVariableName = filtersElement?.getAttribute(
+      "wized-filter-current-page"
+    );
+    if (
+      currentPageVariableName &&
+      Wized.data.v.hasOwnProperty(currentPageVariableName)
+    ) {
+      Wized.data.v[currentPageVariableName] = 1;
+    }
+    if (window.executeWizedRequest) {
+      window.executeWizedRequest();
+    } else {
+      console.error("Global executeWizedRequest function not found.");
+    }
+  };
+
+  const debouncedResetPageAndExecuteWizedRequest = debounce(
+    resetPageAndExecuteWizedRequest,
+    1000
+  );
+
+  function resetInfiniteLoadingContent() {
+    // Assuming 'variableName' holds the content for infinite loading
+    const variableName = document
+      .querySelector("[wized-load-more-variable]")
+      ?.getAttribute("wized-load-more-variable");
+    if (variableName && Wized.data.v.hasOwnProperty(variableName)) {
+      Wized.data.v[variableName] = []; // Reset the content to an empty array
+    }
+  }
+
+  document.querySelectorAll("[wized-filter-clear]").forEach((clearButton) => {
+    clearButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      const variableNames = clearButton.getAttribute("wized-filter-clear");
+      if (variableNames === "clear-all") {
+        clearAllFilters();
+      } else {
+        resetIndividualFilter(variableNames);
+      }
+    });
+  });
+
+  const attachListeners = () => {
+    // Existing code to attach listeners for checkboxes, radios, selects, and search inputs
+  };
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+        attachListeners();
+      }
+    });
+  });
+
+  observer.observe(document.querySelector('[wized-filter-element="filters"]'), {
+    childList: true,
+    subtree: true,
+  });
+
+  attachListeners();
+  enableRangeSelectOptions();
+});
