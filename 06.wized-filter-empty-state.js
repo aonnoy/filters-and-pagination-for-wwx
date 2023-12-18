@@ -1,1 +1,25 @@
-window.Wized=window.Wized||[];window.Wized.push(()=>{const e=document.querySelector('[wized-filter-element="list"]');const n=document.querySelector('[wized-filter-element="empty-state"]');const t=n.getAttribute("wized-hidden-class");const r=()=>{e.children.length===0?n.classList.remove(t):n.classList.add(t)};const o=new MutationObserver(r);o.observe(e,{childList:!0}),r()});
+window.Wized = window.Wized || [];
+window.Wized.push(() => {
+  const listElement = document.querySelector('[wized-filter-element="list"]');
+  const emptyStateElement = document.querySelector(
+    '[wized-filter-element="empty-state"]'
+  );
+  const hiddenClass = emptyStateElement.getAttribute("wized-hidden-class");
+
+  const updateEmptyStateVisibility = () => {
+    if (listElement.children.length === 0) {
+      emptyStateElement.classList.remove(hiddenClass);
+    } else {
+      emptyStateElement.classList.add(hiddenClass);
+    }
+  };
+
+  const observer = new MutationObserver(updateEmptyStateVisibility);
+
+  observer.observe(listElement, {
+    childList: true, // observe direct children addition or removal
+  });
+
+  // Initial check in case the list is already empty when the script runs
+  updateEmptyStateVisibility();
+});
