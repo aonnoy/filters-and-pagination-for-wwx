@@ -92,6 +92,7 @@ window.Wized.push((Wized) => {
       .map((cb) => cb.nextElementSibling.textContent.trim());
     updateWizedVariable(variableName, checkedValues);
     applyFiltersAndUpdatePage();
+    window.updateFilterButtonVisibility(); // Add this line
   };
 
   const handleRadioChange = (radio) => {
@@ -103,6 +104,7 @@ window.Wized.push((Wized) => {
       : "";
     updateWizedVariable(variableName, value);
     applyFiltersAndUpdatePage();
+    window.updateFilterButtonVisibility(); // Add this line
   };
 
   const handleSelectChange = (select) => {
@@ -110,6 +112,7 @@ window.Wized.push((Wized) => {
     const value = select.value;
     updateWizedVariable(variableName, value);
     applyFiltersAndUpdatePage();
+    window.updateFilterButtonVisibility(); // Add this line
   };
 
   // Function to execute Wized request based on the trigger element
@@ -243,4 +246,3 @@ window.Wized.push((Wized) => {
 
   attachAllListeners(); // Initialize all event listeners
 });
-
