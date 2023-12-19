@@ -85,6 +85,7 @@ window.Wized.push((Wized) => {
     enableRangeSelectOptions();
     resetParentWrapperVisibility();
     debouncedResetPageAndExecuteWizedRequest();
+    window.updateFilterButtonVisibility(); // Add this line
   };
 
   const clearAllFilters = () => {
@@ -111,6 +112,7 @@ window.Wized.push((Wized) => {
     if (filtersWereActive) {
       resetCurrentPageToFirst();
       debouncedResetPageAndExecuteWizedRequest();
+      window.updateFilterButtonVisibility(); // Add this line
     } else {
       console.log(
         "Skipping Wized request execution as no filters were active."
