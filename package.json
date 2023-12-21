@@ -1,0 +1,20 @@
+{
+  "name": "filters-and-pagination-for-wwx",
+  "version": "1.0.2",
+  "description": "",
+  "main": "01-wized-filters.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "combine": "gulp jsBundle",
+    "minify": "gulp minifyJS"
+  },
+  "keywords": [],
+  "author": "Aonnoy Sengupta",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-rename": "^2.0.0",
+    "gulp-terser": "^2.1.0"
+  }
+}
